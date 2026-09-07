@@ -9,7 +9,9 @@
 // console.log(db.get("age"));
 import { HashTable } from "./storage/HashTable.js";
 
-const db = new HashTable();
+const port = Number(process.env.PORT ?? 6379);
+const dumpFile = process.env.DUMP_FILE ?? "dump.json";
+const withCLI = process.argv.includes("--cli");
 
 db.set("ab", "first");
 db.set("ba", "second");
@@ -18,81 +20,28 @@ console.log(db.buckets);
 console.log(db.get("ab"));
 console.log(db.get("ba"));
 
-// import { HashTable } from "./storage/HashTable.js";
+const server = createServer({ store, save });
 
-// const db = new HashTable();
+server.listen(port, () => {
+  console.log(`Redis clone listening on port ${port}`);
+});
 
-// const rl = readline.createInterface({
-//   input: process.stdin,
-//   output: process.stdout,
-//   prompt: "redis> "
-// });
+let shuttingDown = false;
 
-// console.log(db._hash("name"));
-// console.log(db._hash("age"));
-// console.log(db._hash("language"));
+const shutdown = () => {
+  if (shuttingDown) {
+    return;
+  }
 
-// console.log("My Redis server is starting...");
-// rl.prompt();
+  shuttingDown = true;
+  save();
+  console.log(`\nSaved ${store.keys().length} key(s) to ${dumpFile}`);
+  server.close(() => process.exit(0));
+};
 
-// rl.on("line", (input) => {
-//   const parts = input.trim().split(/\s+/);
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
-//   const command = parts[0]?.toUpperCase();
-
-//   switch (command) {
-//     case "SET": {
-//       const key = parts[1];
-//       const value = parts.slice(2).join(" ");
-
-//       if (!key || !value) {
-//         console.log("ERR wrong number of arguments");
-//         break;
-//       }
-
-//       db.set(key, value);
-
-//       console.log("OK");
-//       break;
-//     }
-
-//     case "GET": {
-//       const key = parts[1];
-
-//       if (!key) {
-//         console.log("ERR wrong number of arguments");
-//         break;
-//       }
-
-//       const value = db.get(key);
-
-//       console.log(value ?? "(nil)");
-//       break;
-//     }
-
-//     case "DEL": {
-//       const key = parts[1];
-
-//       if (!key) {
-//         console.log("ERR wrong number of arguments");
-//         break;
-//       }
-
-//       const deleted = db.delete(key);
-
-//       console.log(deleted ? 1 : 0);
-//       break;
-//     }
-
-//     case "EXIT": {
-//       rl.close();
-//       return;
-//     }
-
-//     default: {
-//       console.log(`ERR unknown command '${command}'`);
-//     }
-//   }
-
-//   rl.prompt();
-// });
+if (withCLI) {
+  startCLI({ store, save, onQuit: shutdown });
+}
