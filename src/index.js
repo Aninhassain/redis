@@ -1,24 +1,19 @@
-// import readline from "node:readline";
-// import { HashTable } from "./storage/HashTable.js";
-
-// const db = new HashTable();
-
-// db.set("name", "Alice");
-
-// console.log(db.get("name"));
-// console.log(db.get("age"));
-import { HashTable } from "./storage/HashTable.js";
+import { startCLI } from "./cli.js";
+import { saveToFile, loadFromFile } from "./persistence/file.js";
+import { createServer } from "./server.js";
+import { Store } from "./storage/Store.js";
 
 const port = Number(process.env.PORT ?? 6379);
 const dumpFile = process.env.DUMP_FILE ?? "dump.json";
 const withCLI = process.argv.includes("--cli");
 
-db.set("ab", "first");
-db.set("ba", "second");
+const store = new Store();
+const save = () => saveToFile(store, dumpFile);
+const restored = loadFromFile(store, dumpFile);
 
-console.log(db.buckets);
-console.log(db.get("ab"));
-console.log(db.get("ba"));
+if (restored > 0) {
+  console.log(`Restored ${restored} key(s) from ${dumpFile}`);
+}
 
 const server = createServer({ store, save });
 
