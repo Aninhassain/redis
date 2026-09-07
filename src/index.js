@@ -1,12 +1,22 @@
-import readline from "node:readline";
+// import readline from "node:readline";
+// import { HashTable } from "./storage/HashTable.js";
+
+// const db = new HashTable();
+
+// db.set("name", "Alice");
+
+// console.log(db.get("name"));
+// console.log(db.get("age"));
 import { HashTable } from "./storage/HashTable.js";
 
 const db = new HashTable();
 
-db.set("name", "Alice");
+db.set("ab", "first");
+db.set("ba", "second");
 
-console.log(db.get("name"));
-console.log(db.get("age"));
+console.log(db.buckets);
+console.log(db.get("ab"));
+console.log(db.get("ba"));
 
 // import { HashTable } from "./storage/HashTable.js";
 

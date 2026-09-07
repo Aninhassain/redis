@@ -14,18 +14,24 @@ export class HashTable {
     return hash % this.size;
   }
 
-  set(key, value) {
-    const index = this._hash(key);
+ set(key, value) {
+  const index = this._hash(key);
 
-    console.log("Key:", key);
-    console.log("Hash index:", index);
-
-    if (!this.buckets[index]) {
-      this.buckets[index] = [];
-    }
-
-    this.buckets[index].push([key, value]);
+  if (!this.buckets[index]) {
+    this.buckets[index] = [];
   }
+
+  const bucket = this.buckets[index];
+
+  for (const entry of bucket) {
+    if (entry[0] === key) {
+      entry[1] = value;
+      return;
+    }
+  }
+
+  bucket.push([key, value]);
+}
 
   get(key) {
     const index = this._hash(key);
